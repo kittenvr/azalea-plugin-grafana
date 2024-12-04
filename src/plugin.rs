@@ -74,7 +74,7 @@ impl Log {
     }
 }
 
-async fn logging::send_log_to_loki(endpoint: &str, log: Log) {
+async fn send_log_to_loki(endpoint: &str, log: Log) {
     let client = reqwest::Client::new();
     let _ = client.post(endpoint).json(&log).send().await;
 }

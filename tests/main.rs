@@ -1,6 +1,13 @@
-use super::*;
+use prometheus::{Encoder, TextEncoder, register_int_gauge};
+use reqwest::Client;
+use std::sync::Arc;
 use tokio::sync::Mutex;
 use warp::Filter;
+
+mod config;
+mod metrics;
+mod plugin;
+mod logging;
 
 #[tokio::test]
 async fn test_main() {
