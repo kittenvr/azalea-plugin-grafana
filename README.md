@@ -1,2 +1,1 @@
-# azalea-plugin-grafana
-A repository for the Azalea plugin
+This repository is empty. Any task executed on it should be considered a new capability and needs to be created.
