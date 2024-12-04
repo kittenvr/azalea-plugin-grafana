@@ -1,16 +1,9 @@
-use prometheus::{Encoder, TextEncoder, register_int_gauge};
-use reqwest::Client;
-use std::sync::Arc;
+use super::*;
 use tokio::sync::Mutex;
 use warp::Filter;
 
-mod config;
-mod metrics;
-mod plugin;
-mod logging;
-
-#[tokio::main]
-async fn main() {
+#[tokio::test]
+async fn test_main() {
     // Load configuration
     let config = config::Config::load_config().expect("Failed to load configuration");
 
@@ -61,4 +54,33 @@ async fn main() {
     // Start the server
     let routes = metrics_route.or(loki_route);
     warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
+}
+
+#[tokio::test]
+async fn test_plugin() {
+    // Load configuration
+    let config = config::Config::load_config().expect("Failed to load configuration");
+
+    // Initialize Prometheus metrics
+    let player_count = register_int_gauge!("minecraft_player_count", "Number of players online").unwrap();
+    let tps = register_int_gauge!("minecraft_tps", "Server TPS").unwrap();
+    let latency = register_int_gauge!("minecraft_latency", "Bot latency").unwrap();
+
+    let metrics = Arc::new(Mutex::new(metrics::Metrics {
+        player_count,
+        tps,
+        latency,
+    }));
+
+    // Initialize Azalea bot
+    let bot = azalea::Azalea::new(config.bot_token.clone(), config.server_address.clone())
+        .await
+        .expect("Failed to initialize Azalea bot");
+
+    // Load plugin
+    let plugin = plugin::Plugin::new(metrics.clone(), config.clone());
+    bot.load_plugin(plugin).await.expect("Failed to load plugin");
+
+    // Test plugin functionality
+    // Add your specific plugin tests here
 }

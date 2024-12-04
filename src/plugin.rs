@@ -1,8 +1,11 @@
-use azalea::prelude::*;
+use azalea::*;
 use prometheus::IntGauge;
 use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use async_trait::async_trait;
+use azalea::AzaleaPlugin;
+use azalea::Player;
 
 #[derive(Clone)]
 pub struct Plugin {
@@ -22,19 +25,19 @@ impl AzaleaPlugin for Plugin {
         let mut metrics = self.metrics.lock().await;
         metrics.player_count.inc();
         let log = Log::new("player_join", player.username.clone(), None);
-        send_log_to_loki(&self.config.loki_endpoint, log).await;
+        logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
     }
 
     async fn on_player_leave(&self, player: &Player) {
         let mut metrics = self.metrics.lock().await;
         metrics.player_count.dec();
         let log = Log::new("player_leave", player.username.clone(), None);
-        send_log_to_loki(&self.config.loki_endpoint, log).await;
+        logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
     }
 
     async fn on_chat_message(&self, player: &Player, message: &str) {
         let log = Log::new("chat_message", player.username.clone(), Some(message.to_string()));
-        send_log_to_loki(&self.config.loki_endpoint, log).await;
+        logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
     }
 
     async fn on_tick(&self, tps: f64, latency: u64) {
@@ -71,7 +74,7 @@ impl Log {
     }
 }
 
-async fn send_log_to_loki(endpoint: &str, log: Log) {
+async fn logging::send_log_to_loki(endpoint: &str, log: Log) {
     let client = reqwest::Client::new();
     let _ = client.post(endpoint).json(&log).send().await;
 }
