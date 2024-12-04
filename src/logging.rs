@@ -1,5 +1,6 @@
 use reqwest::Client;
 use serde::Serialize;
+use warp::Filter;
 
 #[derive(Serialize)]
 pub struct Log {

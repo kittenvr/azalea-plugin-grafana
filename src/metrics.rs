@@ -1,4 +1,5 @@
 use prometheus::{IntGauge, register_int_gauge};
+use warp::Filter;
 
 pub struct Metrics {
     pub player_count: IntGauge,

@@ -3,6 +3,7 @@ use reqwest::Client;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use warp::Filter;
+use toml;
 
 mod config;
 mod metrics;
