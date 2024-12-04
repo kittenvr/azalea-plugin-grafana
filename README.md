@@ -54,6 +54,8 @@ azalea = "0.1"
 prometheus = "0.12"
 reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
+warp = "0.3"
+toml = "0.5"
 ```
 
 ## Configuration
