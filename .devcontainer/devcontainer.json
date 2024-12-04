@@ -1,0 +1,7 @@
+{
+  "tasks": {
+    "test": "cargo test",
+    "build": "cargo build",
+    "launch": "cargo run"
+  }
+}
