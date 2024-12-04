@@ -1,24 +1,51 @@
 use reqwest::Client;
 use serde::Serialize;
-use warp::Filter;
+use std::time::{SystemTime, UNIX_EPOCH};
+use crate::error::Result;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Log {
     pub event: String,
     pub username: String,
     pub message: Option<String>,
+    pub timestamp: u64,
 }
 
 impl Log {
-    pub fn new(event: &str, username: String, message: Option<String>) -> Self {
+    pub fn new(event: impl Into<String>, username: impl Into<String>, message: Option<String>) -> Self {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+
         Log {
-            event: event.to_string(),
-            username,
+            event: event.into(),
+            username: username.into(),
             message,
+            timestamp,
         }
     }
 }
 
-pub async fn send_log_to_loki(client: &Client, endpoint: &str, log: Log) {
-    let _ = client.post(endpoint).json(&log).send().await;
+pub struct Logger {
+    client: Client,
+    endpoint: String,
+}
+
+impl Logger {
+    pub fn new(endpoint: String) -> Self {
+        Logger {
+            client: Client::new(),
+            endpoint,
+        }
+    }
+
+    pub async fn send_log(&self, log: Log) -> Result<()> {
+        self.client
+            .post(&self.endpoint)
+            .json(&log)
+            .send()
+            .await?;
+        Ok(())
+    }
 }
