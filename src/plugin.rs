@@ -25,19 +25,19 @@ impl AzaleaPlugin for Plugin {
         let mut metrics = self.metrics.lock().await;
         metrics.player_count.inc();
         let log = Log::new("player_join", player.username.clone(), None);
-        logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
+        crate::logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
     }
 
     async fn on_player_leave(&self, player: &Player) {
         let mut metrics = self.metrics.lock().await;
         metrics.player_count.dec();
         let log = Log::new("player_leave", player.username.clone(), None);
-        logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
+        crate::logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
     }
 
     async fn on_chat_message(&self, player: &Player, message: &str) {
         let log = Log::new("chat_message", player.username.clone(), Some(message.to_string()));
-        logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
+        crate::logging::send_log_to_loki(&self.config.loki_endpoint, log).await;
     }
 
     async fn on_tick(&self, tps: f64, latency: u64) {

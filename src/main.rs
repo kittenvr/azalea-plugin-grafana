@@ -26,7 +26,7 @@ async fn main() {
     }));
 
     // Initialize Azalea bot
-    let bot = azalea::Azalea::new(config.bot_token.clone(), config.server_address.clone())
+    let bot = azalea::AzaleaBot::new(config.bot_token.clone(), config.server_address.clone())
         .await
         .expect("Failed to initialize Azalea bot");
 

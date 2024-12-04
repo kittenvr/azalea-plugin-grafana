@@ -12,7 +12,7 @@ mod logging;
 #[tokio::test]
 async fn test_main() {
     // Load configuration
-    let config = config::Config::load_config().expect("Failed to load configuration");
+    let config = crate::config::Config::load_config().expect("Failed to load configuration");
 
     // Initialize Prometheus metrics
     let player_count = register_int_gauge!("minecraft_player_count", "Number of players online").unwrap();
@@ -26,12 +26,12 @@ async fn test_main() {
     }));
 
     // Initialize Azalea bot
-    let bot = azalea::Azalea::new(config.bot_token.clone(), config.server_address.clone())
+    let bot = azalea::AzaleaBot::new(config.bot_token.clone(), config.server_address.clone())
         .await
         .expect("Failed to initialize Azalea bot");
 
     // Load plugin
-    let plugin = plugin::Plugin::new(metrics.clone(), config.clone());
+    let plugin = crate::plugin::Plugin::new(metrics.clone(), config.clone());
     bot.load_plugin(plugin).await.expect("Failed to load plugin");
 
     // Set up Prometheus metrics endpoint
@@ -53,7 +53,7 @@ async fn test_main() {
             let client = client.clone();
             let loki_endpoint = config.loki_endpoint.clone();
             tokio::spawn(async move {
-                logging::send_log_to_loki(&client, &loki_endpoint, log).await;
+                crate::logging::send_log_to_loki(&client, &loki_endpoint, log).await;
             });
             warp::reply::json(&"Log received")
         });
@@ -66,7 +66,7 @@ async fn test_main() {
 #[tokio::test]
 async fn test_plugin() {
     // Load configuration
-    let config = config::Config::load_config().expect("Failed to load configuration");
+    let config = crate::config::Config::load_config().expect("Failed to load configuration");
 
     // Initialize Prometheus metrics
     let player_count = register_int_gauge!("minecraft_player_count", "Number of players online").unwrap();
@@ -80,12 +80,12 @@ async fn test_plugin() {
     }));
 
     // Initialize Azalea bot
-    let bot = azalea::Azalea::new(config.bot_token.clone(), config.server_address.clone())
+    let bot = azalea::AzaleaBot::new(config.bot_token.clone(), config.server_address.clone())
         .await
         .expect("Failed to initialize Azalea bot");
 
     // Load plugin
-    let plugin = plugin::Plugin::new(metrics.clone(), config.clone());
+    let plugin = crate::plugin::Plugin::new(metrics.clone(), config.clone());
     bot.load_plugin(plugin).await.expect("Failed to load plugin");
 
     // Test plugin functionality
