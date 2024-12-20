@@ -12,18 +12,10 @@ mod logging;
 #[tokio::test]
 async fn test_main() {
     // Load configuration
-    let config = crate::config::Config::load_config().expect("Failed to load configuration");
+    let config = crate::config::Config::load().expect("Failed to load configuration");
 
     // Initialize Prometheus metrics
-    let player_count = register_int_gauge!("minecraft_player_count", "Number of players online").unwrap();
-    let tps = register_int_gauge!("minecraft_tps", "Server TPS").unwrap();
-    let latency = register_int_gauge!("minecraft_latency", "Bot latency").unwrap();
-
-    let metrics = Arc::new(Mutex::new(metrics::Metrics {
-        player_count,
-        tps,
-        latency,
-    }));
+    let metrics = crate::metrics::Metrics::new();
 
     // Initialize Azalea bot
     let bot = azalea::AzaleaBot::new(config.bot_token.clone(), config.server_address.clone())
@@ -35,7 +27,6 @@ async fn test_main() {
     bot.load_plugin(plugin).await.expect("Failed to load plugin");
 
     // Set up Prometheus metrics endpoint
-    let metrics_clone = metrics.clone();
     let metrics_route = warp::path("metrics")
         .map(move || {
             let encoder = TextEncoder::new();
@@ -49,7 +40,7 @@ async fn test_main() {
     let client = Client::new();
     let loki_route = warp::path("loki")
         .and(warp::body::json())
-        .map(move |log: logging::Log| {
+        .map(move |log: crate::logging::Log| {
             let client = client.clone();
             let loki_endpoint = config.loki_endpoint.clone();
             tokio::spawn(async move {
@@ -60,24 +51,16 @@ async fn test_main() {
 
     // Start the server
     let routes = metrics_route.or(loki_route);
-    warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
+    warp::serve(routes).run(([0, 0, 0, 0], config.metrics_port)).await;
 }
 
 #[tokio::test]
 async fn test_plugin() {
     // Load configuration
-    let config = crate::config::Config::load_config().expect("Failed to load configuration");
+    let config = crate::config::Config::load().expect("Failed to load configuration");
 
     // Initialize Prometheus metrics
-    let player_count = register_int_gauge!("minecraft_player_count", "Number of players online").unwrap();
-    let tps = register_int_gauge!("minecraft_tps", "Server TPS").unwrap();
-    let latency = register_int_gauge!("minecraft_latency", "Bot latency").unwrap();
-
-    let metrics = Arc::new(Mutex::new(metrics::Metrics {
-        player_count,
-        tps,
-        latency,
-    }));
+    let metrics = crate::metrics::Metrics::new();
 
     // Initialize Azalea bot
     let bot = azalea::AzaleaBot::new(config.bot_token.clone(), config.server_address.clone())
