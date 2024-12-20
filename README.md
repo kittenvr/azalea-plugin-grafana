@@ -333,3 +333,36 @@ pub async fn send_log_to_loki(client: &Client, endpoint: &str, log: Log) {
 5. Customize the dashboard to your preference and save it.
 
 You should now have a fully functional Grafana dashboard displaying real-time metrics and logs from your Minecraft server.
+
+## Installing Rust and Cargo
+
+To build and run this project, you need to have Rust and Cargo installed. Follow these steps to install Rust and Cargo:
+
+1. Install Rust and Cargo by running the following command in your terminal:
+
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+2. Follow the on-screen instructions to complete the installation.
+
+3. After the installation is complete, add the Cargo bin directory to your PATH by adding the following line to your shell profile (e.g., `.bashrc`, `.zshrc`, or `.profile`):
+
+```sh
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+4. Reload your shell profile by running the following command:
+
+```sh
+source ~/.bashrc  # or source ~/.zshrc, or source ~/.profile
+```
+
+5. Verify the installation by running the following commands:
+
+```sh
+rustc --version
+cargo --version
+```
+
+You should see the versions of Rust and Cargo printed in the terminal.
